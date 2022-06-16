@@ -3,22 +3,17 @@ class Handler:
         self.__methods = methods
 
     def get(self, func, request, *args, **kwargs):
-        if not request['method'] or request['method'] == 'GET':
-            return f'GET: {func(request)}'
+        return f'GET: {func(request)}'
 
     def post(self, func, request, *args, **kwargs):
-        if not request['method'] or request['method'] == 'POST':
-            return f'POST: {func(request)}'
+        return f'POST: {func(request)}'
 
     def __call__(self, func):
         def wrapper(request, *args, **kwargs):
-            self.meth_ = request['method']
             if not request['method'] or request['method'] == 'GET' and 'GET' in self.__methods:
                 return self.get(func, request)
             elif request['method'] in self.__methods:
-                # return self.meth_ #(func, request)
                 return self.post(func, request)
-            # return self.method(func, request)
         return wrapper
 
 
@@ -31,17 +26,17 @@ res = contact({"method": "POST", "url": "contact.html"})
 print(res)
 
 
-# def __getattribute__(self, item):
-    #     print("__getattribute__", item)
-    #     if item == 'method':
-    #         print(self.request['method'])
-    #         if not self.request['method'] or self.request['method'] == 'GET' and 'GET' in self.__methods:
-    #             return object.__getattribute__(self, 'get')
-    #         elif self.request['method'] in self.__methods:
-    #             return object.__getattribute__(self, 'get')
-    #     else:
-    #         return object.__getattribute__(self, item)
+
 '''
+Пример
+ def __call__(self, func):
+        def wrapper(request, *args, **kwargs):
+            self.__method = request.get('method','GET')
+            if self.__method not in self.__allowed_methods:
+                return None
+            return getattr(self, str(self.__method).lower())(func, request, args, kwargs)
+        return wrapper
+
 Необходимо объявить класс-декоратор с именем Handler, который можно было бы применять к функциям, следующим образом:
 
 Здесь аргумент methods декоратора Handler содержит список разрешенных запросов для обработки. Сама декорированная 
