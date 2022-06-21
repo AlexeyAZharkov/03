@@ -1,68 +1,92 @@
-class MaxPooling:
-    def __init__(self, step=(2, 2), size=(2, 2)):
-        self.step = step
-        self.size = size
+class Dimensions:
+    MIN_DIMENSION = 10
+    MAX_DIMENSION = 10000
 
-    def __call__(self, matrix, *args, **kwargs):
-        self.check_matrix(matrix)
-        return self.step_2(self.step_1(matrix))
+    def __init__(self, a, b, c):
+        self.__a = a
+        self.__b = b
+        self.__c = c
 
-    def step_1(self, m):
-        matrix1 = []
-        for k in range(len(m)):
-            line1 = []
-            for i in range(0, len(m[0]), self.step[0]):
-                if i + self.size[0] <= len(m[0]):
-                    line1.append(max([m[k][j] for j in range(i, i + self.size[0])]))
-            matrix1.append(line1)
-        return matrix1
+    @classmethod
+    def in_dimention(cls, x):
+        return cls.MIN_DIMENSION <= x <= cls.MAX_DIMENSION
 
-    def step_2(self, m):
-        matrix1 = []
+    @property
+    def a(self):
+        return self.__a
 
-        for k in range(len(m[0])):
-            row = []
-            for i in range(0, len(m), self.step[1]):
-                if i + self.size[1] <= len(m):
-                    row.append(max([m[j][k] for j in range(i, i + self.size[1])]))
-            matrix1.append(row)
-        line = []
-        res_m = []
-        for i in range(len(matrix1[0])):
-            line.append([matrix1[j][i] for j in range(len(matrix1))])
-        res_m.extend(line)
-        return res_m
+    @a.setter
+    def a(self, a):
+        if self.in_dimention(a):
+            self.__a = a
 
-    def check_matrix(self, matrix):
-        if self.get_depth(matrix) != 2:
-            raise ValueError("Неверный формат для первого параметра matrix.")
-        len_x = len(matrix)
-        len_y = len(matrix[0])
-        for i in range(len_x):
-            if len(matrix[i]) != len_y:
-                raise ValueError("Неверный формат для первого параметра matrix.")
-            for j in range(len_y):
-                if type(matrix[i][j]) not in (int, float):
-                    raise ValueError("Неверный формат для первого параметра matrix.")
+    @property
+    def b(self):
+        return self.__b
 
-    def get_depth(self, l):
-        if isinstance(l, (list, tuple)):
-            t = []
-            for itm in l:
-                t += self.get_depth(itm),
-            return 1 + (max(t) if t else 0)
-        return 0
+    @b.setter
+    def b(self, b):
+        if self.in_dimention(b):
+            self.__b = b
+
+    @property
+    def c(self):
+        return self.__c
+
+    @c.setter
+    def c(self, c):
+        if self.in_dimention(c):
+            self.__c = c
+
+    def __lt__(self, other):
+        if not isinstance(other, Dimensions):
+            raise TypeError("Операнд справа должен иметь тип Dimensions")
+        return self.a * self.b * self.c < other.a * other.b * other.c
+
+    def __le__(self, other):
+        if not isinstance(other, Dimensions):
+            raise TypeError("Операнд справа должен иметь тип Dimensions")
+        return self.a * self.b * self.c <= other.a * other.b * other.c
 
 
-mp = MaxPooling(step=(2, 2), size=(2,2))
-res = mp([[1, 2, 3, 4], [5, 6, 7, 8], [9, 8, 7, 6], [5, 4, 3, 2], [5, 4, 3, 2], [5, 4, 3, 2]])    # [[6, 8], [9, 7]]
-print(res)
+class ShopItem:
+        def __init__(self, name, price, dim):
+            self.name = name
+            self.price = price
+            self.dim = dim
+
+        def volume(self):
+            return self.dim
+
+
+dim1 = Dimensions(40, 30, 120)
+dim2 = Dimensions(10, 20, 50)
+dim3 = Dimensions(2000, 600, 500)
+dim4 = Dimensions(500, 200, 200)
+
+item1 = ShopItem('кеды', 1024, dim1)
+item2 = ShopItem('зонт', 500.24, dim2)
+item3 = ShopItem('холодильник', 40000, dim3)
+item4 = ShopItem('табуретка', 2000.99, dim4)
+
+lst_shop = [item1, item2, item3, item4]
+lst_shop_sorted = sorted(lst_shop, key=ShopItem.volume)
+
+print(lst_shop_sorted)
+for i in lst_shop_sorted:
+    print(i.dim.a)
+
+print(dim1 >= dim2)   # True, если объем dim1 больше или равен объему dim2
+print(dim1 > dim2)    # True, если объем dim1 больше объема dim2
+print(dim1 <= dim2)   # True, если объем dim1 меньше или равен объему dim2
+print(dim1 < dim2)    # True, если объем dim1 меньше объема dim2
 
 '''
+- кеды; 1024; (40, 30, 120)
+- зонт; 500.24; (10, 20, 50)
+- холодильник; 40000; (2000, 600, 500)
+- табуретка; 2000.99; (500, 200, 200)
 Объявите класс Dimensions (габариты) с атрибутами:
-
-MIN_DIMENSION = 10
-MAX_DIMENSION = 10000
 
 Каждый объект класса Dimensions должен создаваться командой:
 
@@ -95,13 +119,11 @@ dim - габариты товара (объект класса Dimensions).
 
 Создайте список с именем lst_shop из четырех товаров со следующими данными:
 
-- кеды; 1024; (40, 30, 120)
-- зонт; 500.24; (10, 20, 50)
-- холодильник; 40000; (2000, 600, 500)
-- табуретка; 2000.99; (500, 200, 200)
+
 
 Сформируйте новый список lst_shop_sorted с упорядоченными по возрастанию объема (габаритов) товаров списка lst_shop, 
-используя стандартную функцию sorted() языка Python и ее параметр key для настройки сортировки. Прежний список lst_shop должен оставаться без изменений.
+используя стандартную функцию sorted() языка Python и ее параметр key для настройки сортировки. 
+Прежний список lst_shop должен оставаться без изменений.
 
 P.S. На экран в программе ничего выводить не нужно.
 '''
