@@ -15,11 +15,6 @@ class IntegerValue:
         instance.__dict__[self.name] = value
 
 
-    #
-    # def __str__(self):
-    #     return ' '.join(str(v.value) for v in self.arr)
-
-
 class CellInteger:
     value = IntegerValue()
 
@@ -34,22 +29,21 @@ class TableValues:
         self.rows = rows
         self.cols = cols
         self.cell = cell
+        self.cells = tuple()
+        for i in range(rows):
+            self.cells += (tuple(cell(0) for _ in range(cols)),)
 
     def __getitem__(self, item):
-        if item >= self.max_length or not isinstance(item, int):
-            raise IndexError('неверный индекс для доступа к элементам массива')
-        return self.arr[item].value
+        return self.cells[item[0]][item[1]].value
 
     def __setitem__(self, key, value):
-        if key >= self.max_length or not isinstance(key, int):
-            raise IndexError('неверный индекс для доступа к элементам массива')
-        self.arr[key].value = value
+        self.cells[key[0]][key[1]].value = value
 
 
 table = TableValues(2, 3, cell=CellInteger)
 print(table[0, 1])
-table[1, 1] = 10
-table[0, 0] = 1.45 # генерируется исключение ValueError
+table[1, 2] = 10
+table[0, 0] = 1 # генерируется исключение ValueError
 
 # вывод таблицы в консоль
 for row in table.cells:
